@@ -1,0 +1,166 @@
+\documentclass[a4paper]{article}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{mathrsfs}
+\usepackage{authblk}
+\usepackage{graphicx}
+
+\addtolength{\textwidth}{1cm}
+
+\usepackage{amsmath}
+\DeclareMathOperator\arctanh{arctanh}
+\DeclareSymbolFontAlphabet{\mathrsfs}{rsfs}
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
+\newcommand{\scri}{\mathrsfs{I}} \newcommand{\izero}{\imath^0}
+\newcommand{\const}{\text{const}} \newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\providecommand{\todo}[1]{\textsl{\textbf{TODO:}#1}} 
+\renewcommand{\figurename}{Figure}
+
+
+
+\title{\Huge \textbf{Stability in Wave Equation on Schwarzschild-de Sitter Spacetime}}
+\author{Riddhiman Bhattacharya}
+\date{June 18, 2023}
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    We explore numerical stability issues and hyperboloidal coordinate choices for solving the wave equation on Schwarzschild-de Sitter (SdS) spacetime. In particular, we consider the treatment of the origin with a spherical symmetry boundary condition and use finite differences to discretize the equation. We demonstrate that a direct discretization is numerically unstable and propose an alternative stable approach by employing a suitable identity. We then introduce hyperboloidal coordinates and explore different choices for the height function to remove the metric singularity at the roots of $f$, which is the metric function in the SdS spacetime. We analyze the characteristic speeds of spherical light rays and assess the numerical properties of each coordinate choice. Finally, we present a regularized form of the scalar wave equation after transformations into tortoise and compactified hyperboloidal coordinates. This study provides valuable insights into numerical stability and coordinate choices for solving wave equations on SdS spacetime, paving the way for reliable simulations of gravitational wave phenomena and other physics in this spacetime background. 
+\end{abstract}
+\large
+\section{Wave equation on de-Sitter space-time}
+
+
+\subsection{Treatment of the origin}
+
+We want to solve the following equation for the unknown $u(r,t)$ using finite differences
+\be\label{eq:spherical_wave} \partial_t u = \partial_r u + \frac{2}{r} u,\ee
+on the domain $r\in[0,R]$. Spherical symmetry implies the following boundary condition at the origin 
+\be\label{eq:spherical_bc} \partial_r u(0,t) = 0.\ee
+One might be inclined to directly discretize Eq.~\eqref{eq:spherical_wave} and then impose the boundary condition Eq.~\eqref{eq:spherical_bc} in a one-sided derivative operator. It turns out that this approach is numerically unstable. Instead, we use the following identity
+\[ \frac{u}{r} =  \partial_r u - r \, \partial_r \left(\frac{u}{r}\right), \]
+to rewrite Eq.~\eqref{eq:spherical_wave} as
+\[  \partial_t u = 3 \partial_r u - 2 r\, \partial_r \left( \frac{u}{r} \right). \]
+Of course, the division by $r$ is still there, but now the discretization with the boundary condition \eqref{eq:spherical_bc} is stable.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Wave equation on Schwarzschild-de Sitter space-time}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The Schwarzschild-de Sitter (SdS) metric on the static patch
+\begin{equation}\label{eq:ssds}
+ ds^2 = - f dt^2 + \frac{1}{f} dr^2 + r^2 d\omega^2,\qquad f(r) = 1-\frac{r^2}{L^2} - \frac{2M}{r}\,.
+\end{equation}
+The metric is singular at the roots of $f$. Assuming $0<r_e<r_c$ and setting $r_0=-(r_e+r_c)$, we write
+\be\label{eq:f} f = \frac{1}{L^2 r} (r-r_e)(r_c-r)(r-r_0), \quad L^2 = r_e^2 + r_e r_c + r_c^2.\ee
+
+\subsection*{Hyperboloidal coordinates}
+Introduce hyperboloidal time $\tau$ as usual with the height function $h(r)$ and boost $H(r)$
+\[ \tau = t - h(r), \qquad H(r):= \frac{dh}{dr}.\]
+The hyperboloidal SdS metric reads
+\be\label{eq:metric_fH} ds^2 = - f d\tau^2 - 2 fH d\tau dr + \frac{1}{f}\left(1-f^2 H^2\right) dr^2 + r^2 d\omega^2. \ee
+We use the freedom in $H$ to remove the singularity of the metric by requiring $1-f^2 H^2 \sim f$ near the roots of $f$. There are many choices available to achieve this. We need a choice that has good numerical properties. For example, the characteristic speeds should be reasonable.
+
+The characteristic speeds of spherical light rays can be obtained via setting $ds^2=0$ and solving for $c_\pm = dr/d\tau$ which satisfies
+\[ \frac{1}{f} (1-f^2 H^2) c_\pm^2 - 2 f H c_\pm - f = 0.\]
+We get
+\[ c_{\pm} = -\beta \pm \frac{\alpha}{\gamma} = \alpha^2 (fH\pm1) = \frac{f}{\mp 1+ fH}. \]
+By construction, $c_+$ vanishes at the left boundary and $c_-$ vanishes at the right boundary. We also need $c_\pm$ to have ``reasonable'' finite values at their respective boundaries when they do not vanish.
+
+\subsubsection{\bf Choice 1:}
+\be\label{eq:fH} f H = 2 \frac{r-r_e}{r_c-r_e} - 1.\ee
+We get the metric
+\[ ds^2 = - f dt^2 - 2 \left(2 \frac{r-r_e}{r_c-r_e} - 1\right) d\tau dr + \frac{4 L^2 r}{(r_c-r_e)^2 (r-r_0)} dr^2 + r^2 d\omega^2. \]
+Now using \eqref{eq:f} and \eqref{eq:fH}
+\[ c_{+} = \frac{1}{2L^2 r} (r-r_e)(r-r_0)(r_c-r_e), \qquad  c_{-} = \frac{1}{2L^2 r} (r_c-r)(r-r_0)(r_c-r_e) \]
+As expected, $c_+(r_e)=0=c_-(r_c)$. When they don't vanish at the boundaries, we have
+\[ c_+(r_c) = \frac{(r_c-r_e)^2 (r_e+2 r_c)}{2L^2 r_c}, \qquad c_-(r_e) =  \frac{(r_c-r_e)^2 (r_c+2 r_e)}{2L^2 r_e}. \]
+We are interested in the large $r_c$ case. We see that $c_(r_e) \sim r_c$. This choice is not good because the ingoing characteristic near the black hole horizon increases with large $r_c$, overly restricting our CFL condition. 
+
+\subsubsection{\bf Choice 2:}
+
+We write our previous choice as
+\[ f H = \frac{r_c-r}{r_c-r_e} - \frac{r-r_e}{r_c-r_e},\]
+and modify it slightly as
+\[ f H = \frac{r_e}{r} \frac{r_c-r}{r_c-r_e} - \frac{r-r_e}{r_c-r_e}.\]
+The characteristics read now
+\[ c_{+} = \frac{1}{L^2 (r+r_e)} (r-r_e)(r-r_0)(r_c-r_e), \qquad  c_{-} = \frac{1}{L^2 (r+r_c)} (r_c-r)(r-r_0)(r_c-r_e) \]
+The non-vanishing boundary speeds are
+\[ c_+(r_c) = \frac{(r_c-r_e)^2 (r_e+2 r_c)}{L^2 (r_c+r_e)}, \qquad c_-(r_e) =  \frac{(r_c-r_e)^2 (r_c+2 r_e)}{L^2 (r_c+r_e)}. \]
+Both speeds are on the order of unity for large $r_c$. The small modification fixes the behavior of the characteristic speeds.
+
+\subsubsection{\bf Choice 3:}
+Another choice is the one by Hintz and Xie in \cite{hintz:2021}. They chose the height function as
+\[ -h(r) = \frac{1}{2\kappa_e} \ln(r-r_e) + \frac{1}{2\kappa_c} \ln(r-r_c). \]
+So the boost is then
+\[ -H = \frac{1}{2\kappa_e (r-r_e)}+ \frac{1}{2\kappa_c (r-r_c)}.\]
+In particular
+\[ fH = - \frac{r_e}{r} \frac{r_c-r}{r_c-r_e} \frac{r-r_0}{r_e-r_0} +  \frac{r_c}{r} \frac{r-r_e}{r_c-r_e} \frac{r-r_0}{r_c-r_0}. \]
+We get the metric
+\[ ds^2 = - f dt^2 - 2 \left(2 \frac{r-r_e}{r_c-r_e} - 1\right) d\tau dr + \frac{4 \ell^2 r}{(r_c-r_e)^2 (r-r_0)} dr^2 + r^2 d\omega^2. \]
+
+Now using \eqref{eq:f} and \eqref{eq:fH}
+\[ c_{+} = \frac{1}{2\ell^2 r} (r-r_e)(r-r_0)(r_c-r_e), \qquad  c_{-} = \frac{1}{2\ell^2 r} (r_c-r)(r-r_0)(r_c-r_e) \]
+
+\subsubsection{\bf Choice 4:}
+
+Take the tortoise coordinate defined through
+\[ r_\ast = \int\frac{1}{f}dr \]
+The metric becomes 
+\[ ds^2 = f \left( -dt^2 + dr_\ast^2\right) + r(r_\ast)^2 d\omega^2. \]
+Define the new time coordinate as 
+\[ \tau = t - \sqrt{1+r_\ast^2}. \]
+The main advantage of this construction is that it's easy to adapt to the requirements of the numerical computation as follows
+\[ \tau = t - \sqrt{K^2+(r_\ast-p)^2}. \]
+For now, we just set $p=0$ and recompactify space using
+\[ r_\ast  = \frac{\rho_\ast}{\Omega} \quad \rm{with} \quad \Omega = \frac{1-\rho_\ast^2}{2}.\]
+This transformation maps the radial coordinate $r_\ast\in(-\infty,\infty)$ to $\rho\in[-1,1]$. The metric reads then
+\[  ds^2 =  \frac{1}{\Omega^2} \left\{ f\left(-\Omega^2 d\tau^2 - 2 \rho_\ast d\tau d\rho_\ast +  d\rho_\ast^2\right) + \rho^2 d\omega^2 \right\}, \] 
+where we have defined $\rho :=  \Omega r$. Note that $\rho$ has the same domain and limits as $\rho_\ast$. This metric is regular, so the transformed equation will be regular as well.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Scalar wave equation}
+We consider the scalar wave equation
+\[ \Box \psi = \frac{1}{\sqrt{-g}} \partial_\mu \left(\sqrt{-g} g^{\mu\nu} \partial_\nu \psi \right) = 0  \]
+After decomposing in spherical modes and writing out
+\[ \partial_{{t}}^{\,2}\psi  = f^2 \partial_r^2 \psi + f \left(\frac{2f}{r}+f'\right) \partial_r \psi - \frac{f \ell^2}{r^2}. \]
+We rescale by $r$ via $u:=\psi/r$ to get
+\[ \partial_{{t}}^{\,2}u  = f^2 \partial_r^2 u + f f' \partial_r u - \frac{f}{r^2} (r f' + \ell^2). \]
+Transforming into the tortoise coordinate gives us
+\[ \partial_{{t}}^{\,2}u  = \partial_{r_\ast}^2 u  - \frac{f}{r^2} (r f' + \ell^2). \]
+Now perform the hyperboloidal tranformation
+\[ \tau = t-\sqrt{1+r_\ast^2} \]
+in combination with compactification
+\[ r_\ast = \frac{\rho_\ast}{\Omega} \quad {\rm with} \quad \Omega=\frac{1-\rho_\ast^2}{2} \]
+The hyperboloidal transformation reads in compactifying coordinates
+\[ \tau = t - \frac{1+\rho_\ast^2}{1-\rho_\ast^2}\]
+The derivative operators transform as
+\[ \partial_\tau = \partial_t, \qquad \partial_{r_\ast} = \frac{2}{1+\rho_\ast^2} \left(-\rho_\ast \partial_\tau + \Omega^2 \partial_{\rho_\ast}\right)  \]
+The resulting equation reads then
+\[ -\partial_\tau^2 - 2 \rho_\ast \partial_\tau \partial_{\rho_\ast} + \Omega^2 \partial_{\rho_\ast}^2 
+- \frac{\Omega}{1+\rho_\ast^2}\left(2 \partial_\tau + \rho_\ast (3+\rho_\ast^2) \partial_{\rho_\ast}\right)=
+\frac{f (1+\rho_\ast^2)}{4\Omega^2 r^2}(r f'+\ell^2). \]
+Note that $\Omega^2 r^2$ is regular at both infinities, so we can define $\rho = \Omega^2 r^2$ which lives on the same domain as $\rho_\ast\in[-1,1]$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{thebibliography}{}
+\bibitem{Bizon} Bizoń, Piotr, Tadeusz Chmaj, and Patryk Mach. "A toy model of hyperboloidal approach to quasinormal modes." arXiv preprint arXiv:2002.01770 (2020).
+\bibitem{carter:1968} B.~Carter, Hamilton-Jacobi and Schr\"{o}dinger separable solutions of Einstein's equations, Commun.~Math.~Phys.~{\bf 10}, 280 (1968).
+\bibitem{Dias12} O.J.C.~Dias, J.E.~Santos, and M.~Stein, Kerr-AdS and its Near-horizon Geometry: Perturbations and the Kerr/CFT Correspondence, J. High Energy Phys. (2012) 2012: 182, arXiv:1208.3322 [hep-th]. 
+\bibitem{Bini12} Bini, D., Esposito, G. and Geralico, A., 2012. de Sitter spacetime: effects of metric perturbations on geodesic motion. General Relativity and Gravitation, 44(2), pp.467-490.
+\bibitem{brady:1999} Brady, P. R., Chambers, C. M., Laarakkers, W. G., and Poisson, E. Radiative falloff in Schwarzschild–de Sitter spacetime. Physical Review D, 60(6), 064003 (1999).
+\bibitem{hintz:2021} Hintz, P., and Xie, YQ. Quasinormal modes of small Schwarzschild-de Sitter black holes. arXiv:2105.02347 (2021).
+\bibitem{zenginoglu:2011} A.~Zengino\u{g}lu and G.~Khanna, Null infinity waveforms from extreme-mass-ratio inspirals in Kerr spacetime, Phys. Rev. X {\bf 1}, 021017 (2011), arXiv:1108.1816  [gr-qc].
+\bibitem{zenginoglu_tiglio_2009} Zengino\u{g}lu, A., and Tiglio, M. Spacelike matching to null infinity. Physical Review D, 80(2), 024044 (2009). 
+\end{thebibliography}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\end{document}
